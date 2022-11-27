@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu -o pipefail
+set -eo pipefail
 
 if [ -z ${LIBRARIES_HOME+x} ]; then
   echo "LIBRARIES_HOME must be set to the libraries directory path... exiting"
@@ -12,7 +12,7 @@ if [ ! -d "$LIBRARIES_HOME" ]; then
   exit 1
 fi
 
-function make_directory() {
+function make-directory {
   directory=$1
 
   lib_directory="$LIBRARIES_HOME/$directory"
@@ -23,57 +23,43 @@ function make_directory() {
   fi
 }
 
-function remove_lib_symlinks() {
-  name=$1
-  directory=$2
+function symlink-lib {
+  name="$(basename "$1")"
+  directory="$(dirname "$1")"
 
-  dest="$LIBRARIES_HOME"
-  if [ ! -z "$directory" ]; then
-    dest="$dest/$directory"
+  if [ "$directory" = "." ]; then
+    directory=
   fi
-  dest="$dest/$name"
-
-  for entry in $dest*; do
-    if [ -h "$entry" ]; then
-      echo "- removing symlink: $entry"
-      rm $entry
-    fi
-  done
-}
-
-function symlink_lib() {
-  name=$1
-  directory=$2
 
   echo
   echo "Symlinking $name"
   echo "- - -"
 
-  remove_lib_symlinks $name $directory
-
   src="$(pwd)/lib"
   dest="$LIBRARIES_HOME"
-  if [ ! -z "$directory" ]; then
+  if [ -n "$directory" ]; then
     src="$src/$directory"
     dest="$dest/$directory"
 
-    make_directory $directory
+    make-directory "$directory"
   fi
   src="$src/$name"
 
   echo "- destination is $dest"
 
-  full_name=$directory/$name
-
-  for entry in $src*; do
-    entry_basename=$(basename $entry)
+  for entry in "$src"*; do
+    entry_basename="$(basename "$entry")"
     dest_item="$dest/$entry_basename"
 
-    echo "- symlinking $entry_basename to $dest_item"
+    if ! [ -L "$dest_item" ]; then
+      echo "- symlinking $entry_basename to $dest_item"
 
-    cmd="ln -s $entry $dest_item"
-    echo $cmd
-    ($cmd)
+      cmd="ln -s $entry $dest_item"
+      echo "$cmd"
+      ($cmd)
+    else
+      echo "- $dest_item is already symlinked"
+    fi
   done
 
   echo "- - -"
@@ -81,4 +67,4 @@ function symlink_lib() {
   echo
 }
 
-symlink_lib 'some_path' 'test_bench'
+symlink-lib "TEMPLATE-PATH"
