@@ -81,4 +81,4 @@ function symlink_lib() {
   echo
 }
 
-symlink_lib 'output' 'test_bench'
+symlink_lib 'some_path' 'test_bench'
