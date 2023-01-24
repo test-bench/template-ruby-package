@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -eu -o pipefail
 
 if [ -z ${LIBRARIES_HOME+x} ]; then
   echo "LIBRARIES_HOME must be set to the libraries directory path... exiting"
