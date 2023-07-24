@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name = 'TEMPLATE-GEM-NAME'
-  s.version = '0'
+  s.version = ENV.fetch('VERSION')
 
   s.authors = ['Nathan Ladd']
   s.email = 'nathanladd+github@gmail.com'
@@ -13,5 +13,5 @@ Gem::Specification.new do |s|
   s.require_paths = %w(lib)
   s.files = Dir.glob 'lib/**/*'
 
-  s.add_development_dependency 'test_bench-bootstrap'
+  s.add_development_dependency 'test_bench-isolated'
 end
