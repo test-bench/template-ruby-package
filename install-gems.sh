@@ -29,7 +29,7 @@ gem="${gem_info[0]}-${gem_info[1]}"
 echo "Gem: $gem"
 echo
 
-cmd="gem install --no-document --install-dir ./gems/ruby/$ruby_api_version --no-user-install --development install-gems-installation.gem"
+cmd="gem install --no-document --install-dir ./gems/ruby/$ruby_api_version --bindir ./gems/bin --no-user-install --development install-gems-installation.gem"
 
 echo $cmd
 ($cmd)
@@ -49,6 +49,23 @@ RUBY
 
 echo
 echo "Wrote ./gems/gems_init.rb"
+
+for bin in ./gems/bin/*; do
+  get_bin_path_rb=$(sed --quiet --regexp-extended "s/^load (Gem\.activate_bin_path\('[^']+', '[^']+'), version\)$/\1)/p" $bin)
+
+  get_relative_path_rb="puts Pathname($get_bin_path_rb).relative_path_from(File.expand_path('gems/bin'))"
+
+  relative_path=$(GEM_PATH=./gems/ruby/$ruby_api_version ruby -r rubygems -r pathname -e "$get_relative_path_rb")
+
+  cat > $bin <<TEXT
+#!/usr/bin/env ruby
+require_relative '../gems_init'
+load File.expand_path('$relative_path', __dir__)
+TEXT
+  chmod 755 $bin
+
+  echo "Wrote executable: $bin"
+done
 
 echo
 echo "(done)"
