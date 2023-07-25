@@ -51,7 +51,7 @@ echo
 echo "Wrote ./gems/gems_init.rb"
 
 for bin in ./gems/bin/*; do
-  get_bin_path_rb=$(sed --quiet --regexp-extended "s/^load (Gem\.activate_bin_path\('[^']+', '[^']+'), version\)$/\1)/p" $bin)
+  get_bin_path_rb=$(sed -n -E "s/^load (Gem\.activate_bin_path\('[^']+', '[^']+'), version\)$/\1)/p" $bin)
 
   get_relative_path_rb="puts Pathname($get_bin_path_rb).relative_path_from(File.expand_path('gems/bin'))"
 
