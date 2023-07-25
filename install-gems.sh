@@ -29,7 +29,7 @@ gem="${gem_info[0]}-${gem_info[1]}"
 echo "Gem: $gem"
 echo
 
-cmd="gem install --no-document --install-dir ./gems/ruby/$ruby_api_version --bindir ./gems/bin --no-user-install --development install-gems-installation.gem"
+cmd="gem install --force --no-document --install-dir ./gems/ruby/$ruby_api_version --bindir ./gems/bin --no-user-install --development install-gems-installation.gem"
 
 echo $cmd
 ($cmd)
