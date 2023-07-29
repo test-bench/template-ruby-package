@@ -53,6 +53,11 @@ echo "Wrote ./gems/gems_init.rb"
 for bin in ./gems/bin/*; do
   get_bin_path_rb=$(sed -n -E "s/^load (Gem\.activate_bin_path\('[^']+', '[^']+'), version\)$/\1)/p" $bin)
 
+  if [ -z "$get_bin_path_rb" ]; then
+    echo -e "\e[1;33mWarning: couldn't install executable file $bin\e[39;22m"
+    continue
+  fi
+
   get_relative_path_rb="puts Pathname($get_bin_path_rb).relative_path_from(File.expand_path('gems/bin'))"
 
   relative_path=$(GEM_PATH=./gems/ruby/$ruby_api_version ruby -r rubygems -r pathname -e "$get_relative_path_rb")
