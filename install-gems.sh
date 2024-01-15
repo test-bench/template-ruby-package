@@ -25,7 +25,7 @@ echo "= = ="
 
 if [ -z ${REMOVE_GEMS+x} ]; then
   echo
-  echo "REMOVE_GEMS is not set. Using \"on\" by default."
+  echo "(REMOVE_GEMS is not set. Using \"on\" by default.)"
   remove_gems="on"
 else
   remove_gems=$REMOVE_GEMS
@@ -38,31 +38,20 @@ else
   posture=$POSTURE
 fi
 
-gem_dir="./gems"
-
-repo_name=$(basename $PWD)
-gemspec=$(ls -A *.gemspec | grep ${repo_name//-/.} || true)
-
+gemspec=$(ls *.gemspec | head -n 1 || true)
 if [ -z "$gemspec" ]; then
-  echo "No gemspec found: ${repo_name//-/*}.gemspec"
+  echo "No gemspec found"
   exit 1
 fi
 
-gem_info=($(
-  gem build $gemspec --output install-gems.gem --quiet 2>/dev/null |
-    sed -E -n 's/^[[:blank:]]*(Name|Version):[[:blank:]]*(.*)$/\2/p'
-))
-gem_name=${gem_info[0]}
-gem="$gem_name-${gem_info[1]}"
-
+gem_dir="./gems"
 install_dir="$gem_dir/ruby/$(ruby -rrbconfig -e "puts RbConfig::CONFIG['ruby_version']")"
+export GEM_HOME="$install_dir"
 
 echo "Posture: $posture"
-echo "Gem Directory: $gem_dir"
 echo "Gemspec: $gemspec"
 
 remove_gems=$(boolean-var remove_gems)
-
 if $remove_gems; then
   echo
   echo "Removing installed gems"
@@ -78,9 +67,11 @@ echo
 echo "Installing gems"
 echo "- - -"
 
-gem_args="--install-dir $install_dir --no-user-install"
+cmd="gem build $gemspec --output install-gems.gem --quiet"
+echo $cmd
+gem_name=$($cmd | sed -E -n 's/^[[:blank:]]*Name:[[:blank:]]*(.*)$/\1/p')
 
-cmd="gem install --minimal-deps --force $gem_args install-gems.gem"
+cmd="gem install --no-user-install install-gems.gem"
 if [ operational != "$posture" ]; then
   cmd="$cmd --development"
 fi
@@ -88,7 +79,12 @@ echo $cmd
 ($cmd)
 echo
 
-cmd="gem uninstall --executables $gem_args $gem_name"
+cmd="gem uninstall --executables --no-user-install $gem_name"
+echo $cmd
+($cmd)
+echo
+
+cmd="gem cleanup --no-user-install"
 echo $cmd
 ($cmd)
 echo
